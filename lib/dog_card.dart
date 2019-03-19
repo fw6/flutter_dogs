@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dogs/dog_model.dart';
+import 'package:flutter_dogs/dog_detail_page.dart';
 
 class DogCard extends StatefulWidget {
   final Dog dog;
@@ -23,36 +24,68 @@ class _DogCardState extends State<DogCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Container(
-        height: 115,
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              left: 50,
-              child: dogCard,
-            ),
-            Positioned(
-              top: 7.5,
-              child: dogImage,
-            )
-          ],
+    return InkWell(
+      onTap: showDogDetailPage,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Container(
+          height: 115,
+          child: Stack(
+            children: <Widget>[
+              Positioned(
+                left: 50,
+                child: dogCard,
+              ),
+              Positioned(
+                top: 7.5,
+                child: dogImage,
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget get dogImage {
-    return Container(
+    Widget dogAvatar = Hero(
+      tag: dog,
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            image: DecorationImage(
+              fit: BoxFit.cover,
+              image: NetworkImage(renderUrl ?? ''),
+            )),
+      ),
+    );
+
+    Widget placeholder = Container(
       width: 100,
       height: 100,
       decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: NetworkImage(renderUrl ?? ''),
-          )),
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.black54, Colors.black, Colors.blueGrey[600]]),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        'DOGGO',
+        textAlign: TextAlign.center,
+      ),
+    );
+
+    return AnimatedCrossFade(
+      firstChild: placeholder,
+      secondChild: dogAvatar,
+      crossFadeState: renderUrl == null
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
+      duration: Duration(milliseconds: 1000),
     );
   }
 
@@ -98,5 +131,11 @@ class _DogCardState extends State<DogCard> {
     setState(() {
       renderUrl = dog.imageUrl;
     });
+  }
+
+  void showDogDetailPage() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => DogDetailPage(dog),
+    ));
   }
 }
